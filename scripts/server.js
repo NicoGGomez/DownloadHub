@@ -21,8 +21,6 @@ app.get("/formats", async (req, res) => {
     let url = decodeURIComponent(req.query.url)
     url = limpiarURL(url)
     // url = url.split("&")[0]
-    const tipo = req.query.tipo
-    const calidad = req.query.calidad
 
     try {
 
@@ -32,7 +30,8 @@ app.get("/formats", async (req, res) => {
             geoBypass: true,
             noCheckCertificates: true,
             addHeader: [
-                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "referer:https://www.youtube.com/"
             ]
         })
 
@@ -65,29 +64,39 @@ app.get("/formats", async (req, res) => {
 
 app.get("/download", async (req, res) => {
 
-    let url = limpiarURL(req.query.url)
-    const format = req.query.format
+    try {
 
-    const info = await youtubedl(url, {
-        dumpSingleJson: true,
-        noWarnings: true
-    })
+        let url = limpiarURL(req.query.url)
+        const format = req.query.format
 
-    const title = info.title.replace(/[^\w\s]/gi, "")
+        const info = await youtubedl(url, {
+            dumpSingleJson: true,
+            noWarnings: true
+        })
 
-    const stream = youtubedl.exec(url, {
-    format: `${format}+bestaudio/best`,
-    output: "-",
-    mergeOutputFormat: "mp4",
-    ffmpegLocation: "ffmpeg"
-    })
+        const title = info.title.replace(/[^\w\s]/gi, "")
 
-    res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${title}.mp4"`
-    )
+        const stream = youtubedl.exec(url, {
+            format: `${format}+bestaudio/best`,
+            output: "-",
+            mergeOutputFormat: "mp4"
+        })
 
-    stream.stdout.pipe(res)
+        res.setHeader(
+            "Content-Disposition",
+            `attachment; filename="${title}.mp4"`
+        )
+
+        stream.stdout.pipe(res)
+
+        stream.stderr.on("data", console.error)
+
+    } catch(err) {
+
+        console.log(err)
+        res.status(500).send("Error descargando")
+
+    }
 
 })
 
