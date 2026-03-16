@@ -1,7 +1,11 @@
 const express = require("express")
 const cors = require("cors")
-const { exec } = require("youtube-dl-exec")
+const youtubedl = require("youtube-dl-exec")
 const ffmpegPath = require("ffmpeg-static")
+
+youtubedl.exec("", {
+  update: true
+}).catch(()=>{})
 
 const app = express()
 app.use(cors())
@@ -23,17 +27,17 @@ app.get("/formats", async (req, res) => {
 
         let url = limpiarURL(decodeURIComponent(req.query.url))
 
-        const info = await exec(url, {
+        const info = await youtubedl(url, {
             dumpSingleJson: true,
             noWarnings: true,
-            preferFreeFormats: true,
+            geoBypass: true,
             addHeader: [
-                "user-agent:Mozilla/5.0",
-                "referer:youtube.com"
+                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                "referer:https://www.youtube.com/"
             ]
         })
 
-        const formats = info.formats
+        const formats = (info.formats || [])
         .filter(f => f.ext === "mp4" && f.height && f.vcodec !== "none")
         .map(f => ({
             calidad: f.height + "p",
@@ -50,7 +54,7 @@ app.get("/formats", async (req, res) => {
 
     } catch(err){
 
-        console.error("ERROR /formats:", err)
+        console.error(err)
 
         res.status(500).json({
             error: "No se pudo obtener el video"
