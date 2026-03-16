@@ -4,16 +4,11 @@ const cors = require("cors")
 const app = express()
 app.use(cors())
 
-function limpiarURL(url){
-
-    const match = url.match(/v=([^&]+)/)
-
-    if(match){
-        return "https://www.youtube.com/watch?v=" + match[1]
-    }
-
-    return url
-}
+const INSTANCES = [
+ "https://pipedapi.kavin.rocks",
+ "https://pipedapi.adminforge.de",
+ "https://pipedapi.tokhmi.xyz"
+]
 
 app.get("/formats", async (req, res) => {
 
@@ -22,11 +17,32 @@ app.get("/formats", async (req, res) => {
         const url = req.query.url
         const videoId = url.split("v=")[1].split("&")[0]
 
-        const response = await fetch(
-            `https://piped.video/api/v1/streams/${videoId}`
-        )
+        let data = null
 
-        const data = await response.json()
+        for(const instance of INSTANCES){
+
+            try{
+
+                const response = await fetch(
+                    `${instance}/api/v1/streams/${videoId}`
+                )
+
+                if(response.ok){
+                    data = await response.json()
+                    break
+                }
+
+            }catch(e){
+                console.log("falló instancia:", instance)
+            }
+
+        }
+
+        if(!data){
+            return res.status(500).json({
+                error: "No hay instancias disponibles"
+            })
+        }
 
         const formats = (data.videoStreams || []).map(v => ({
             calidad: v.quality,
@@ -46,45 +62,6 @@ app.get("/formats", async (req, res) => {
         res.status(500).json({
             error: "No se pudo obtener el video"
         })
-
-    }
-
-})
-
-app.get("/download", async (req, res) => {
-
-    try {
-
-        let url = limpiarURL(req.query.url)
-        const format = req.query.format
-
-        const info = await youtubedl(url, {
-            dumpSingleJson: true,
-            noWarnings: true
-        })
-
-        const title = info.title.replace(/[^\w\s]/gi, "")
-
-        const stream = youtubedl.exec(url, {
-            format: `${format}+bestaudio/best`,
-            output: "-",
-            mergeOutputFormat: "mp4",
-            ffmpegLocation: ffmpegPath
-        })
-
-        res.setHeader(
-            "Content-Disposition",
-            `attachment; filename="${title}.mp4"`
-        )
-
-        stream.stdout.pipe(res)
-
-        stream.stderr.on("data", console.error)
-
-    } catch(err) {
-
-        console.log(err)
-        res.status(500).send("Error descargando")
 
     }
 
