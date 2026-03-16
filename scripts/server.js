@@ -28,10 +28,13 @@ app.get("/formats", async (req, res) => {
 
         const info = await youtubedl(url, {
             dumpSingleJson: true,
-            noWarnings: true
+            noWarnings: true,
+            geoBypass: true,
+            noCheckCertificates: true,
+            addHeader: [
+                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            ]
         })
-
-        const title = info.title.replace(/[^\w\s]/gi, "")
 
 
         const formats = info.formats
