@@ -1,11 +1,6 @@
 const express = require("express")
 const cors = require("cors")
-const youtubedl = require("youtube-dl-exec")
 const ffmpegPath = require("ffmpeg-static")
-
-youtubedl.exec("", {
-  update: true
-}).catch(()=>{})
 
 const app = express()
 app.use(cors())
