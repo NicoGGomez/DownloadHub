@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
 const youtubedl = require("youtube-dl-exec")
+const ffmpegPath = require("ffmpeg-static")
 
 const app = express()
 app.use(cors())
@@ -79,7 +80,8 @@ app.get("/download", async (req, res) => {
         const stream = youtubedl.exec(url, {
             format: `${format}+bestaudio/best`,
             output: "-",
-            mergeOutputFormat: "mp4"
+            mergeOutputFormat: "mp4",
+            ffmpegLocation: ffmpegPath
         })
 
         res.setHeader(
