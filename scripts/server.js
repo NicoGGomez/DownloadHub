@@ -1,6 +1,6 @@
 const express = require("express")
 const cors = require("cors")
-const youtubedl = require("youtube-dl-exec")
+const { exec } = require("youtube-dl-exec")
 const ffmpegPath = require("ffmpeg-static")
 
 const app = express()
@@ -19,32 +19,28 @@ function limpiarURL(url){
 
 app.get("/formats", async (req, res) => {
 
-    let url = decodeURIComponent(req.query.url)
-    url = limpiarURL(url)
-    // url = url.split("&")[0]
-
     try {
 
-        const info = await youtubedl(url, {
+        let url = limpiarURL(decodeURIComponent(req.query.url))
+
+        const info = await exec(url, {
             dumpSingleJson: true,
             noWarnings: true,
-            geoBypass: true,
-            noCheckCertificates: true,
+            preferFreeFormats: true,
             addHeader: [
-                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                "referer:https://www.youtube.com/"
+                "user-agent:Mozilla/5.0",
+                "referer:youtube.com"
             ]
         })
 
-
         const formats = info.formats
-            .filter(f => f.ext === "mp4" && f.height && f.vcodec !== "none")
-            .map(f => ({
-                calidad: f.height + "p",
-                id: f.format_id,
-                height: f.height
-            }))
-            .sort((a,b)=>b.height-a.height)
+        .filter(f => f.ext === "mp4" && f.height && f.vcodec !== "none")
+        .map(f => ({
+            calidad: f.height + "p",
+            id: f.format_id,
+            height: f.height
+        }))
+        .sort((a,b)=>b.height-a.height)
 
         res.json({
             titulo: info.title,
@@ -52,13 +48,14 @@ app.get("/formats", async (req, res) => {
             formatos: formats
         })
 
-    } catch (err) {
+    } catch(err){
 
-        console.log(err)
+        console.error("ERROR /formats:", err)
 
         res.status(500).json({
-            error: err.message
+            error: "No se pudo obtener el video"
         })
+
     }
 
 })
