@@ -31,9 +31,9 @@ app.get("/formats", async (req, res) => {
             dumpSingleJson: true,
             noWarnings: true,
             geoBypass: true,
+            extractorArgs: "youtube:player_client=android",
             addHeader: [
-                "user-agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                "referer:https://www.youtube.com/"
+                "User-Agent:com.google.android.youtube/17.31.35 (Linux; U; Android 11)"
             ]
         })
 
