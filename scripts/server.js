@@ -12,58 +12,62 @@ const INSTANCES = [
 
 app.get("/formats", async (req, res) => {
 
-    try {
+ try{
 
-        const url = req.query.url
-        const videoId = url.split("v=")[1].split("&")[0]
+    const url = req.query.url
 
-        let data = null
+    const videoUrl = new URL(url)
+    const videoId = videoUrl.searchParams.get("v")
 
-        for(const instance of INSTANCES){
+    if(!videoId){
+        return res.status(400).json({error:"URL inválida"})
+    }
 
-            try{
+    let data = null
 
-                const response = await fetch(
-                    `${instance}/api/v1/streams/${videoId}`
-                )
+    for(const instance of INSTANCES){
 
-                if(response.ok){
-                    data = await response.json()
-                    break
-                }
+        try{
 
-            }catch(e){
-                console.log("falló instancia:", instance)
+            const response = await fetch(
+              `${instance}/api/v1/streams/${videoId}`
+            )
+
+            if(response.ok){
+                data = await response.json()
+                break
             }
 
+        }catch(e){
+            console.log("falló instancia:", instance)
         }
-
-        if(!data){
-            return res.status(500).json({
-                error: "No hay instancias disponibles"
-            })
-        }
-
-        const formats = (data.videoStreams || []).map(v => ({
-            calidad: v.quality,
-            id: v.url
-        }))
-
-        res.json({
-            titulo: data.title,
-            miniatura: data.thumbnailUrl,
-            formatos: formats
-        })
-
-    } catch(err){
-
-        console.error(err)
-
-        res.status(500).json({
-            error: "No se pudo obtener el video"
-        })
 
     }
+
+    if(!data){
+        return res.status(500).json({error:"No hay instancias disponibles"})
+    }
+
+    const formats = (data.videoStreams || []).map(v => ({
+        calidad: v.quality,
+        url: v.url
+    }))
+
+    res.json({
+        titulo: data.title,
+        miniatura: data.thumbnailUrl,
+        formatos: formats
+    })
+
+ }catch(err){
+
+    console.error(err)
+
+    res.status(500).json({
+        error:"Error interno"
+    })
+
+ }
 
 })
 
