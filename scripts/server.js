@@ -6,8 +6,8 @@ app.use(cors())
 
 const INSTANCES = [
  "https://pipedapi.kavin.rocks",
- "https://pipedapi.adminforge.de",
- "https://pipedapi.tokhmi.xyz"
+ "https://pipedapi.in.projectsegfau.lt",
+ "https://pipedapi.namazso.eu"
 ]
 
 app.get("/formats", async (req, res) => {
@@ -25,24 +25,25 @@ app.get("/formats", async (req, res) => {
 
     let data = null
 
-    for(const instance of INSTANCES){
+    for (const instance of INSTANCES) {
 
-        try{
+        try {
 
-            const response = await fetch(
-              `${instance}/api/v1/streams/${videoId}`
-            )
+            console.log("probando:", instance)
 
-            if(response.ok){
-                data = await response.json()
-                break
+            const response = await fetch(`${instance}/api/v1/streams/${videoId}`)
+
+            if (response.ok) {
+            console.log("funciona:", instance)
+            data = await response.json()
+            break
             }
 
-        }catch(e){
+        } catch (e) {
             console.log("falló instancia:", instance)
         }
 
-    }
+        }
 
     if(!data){
         return res.status(500).json({error:"No hay instancias disponibles"})
