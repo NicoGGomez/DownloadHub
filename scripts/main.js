@@ -1,3 +1,5 @@
+const API = "https://downloadhub-yuj8.onrender.com"
+
 async function buscar(){
 
     const url = document.getElementById("url").value
@@ -5,7 +7,7 @@ async function buscar(){
     try {
 
         const res = await fetch(
-            "http://localhost:3000/formats?url=" + encodeURIComponent(url)
+            API + "/formats?url=" + encodeURIComponent(url)
         )
 
         const data = await res.json()
@@ -18,7 +20,7 @@ async function buscar(){
 
             <div class="contenedor contenedor-calidad">
             <p>MP3</p>
-            <a href="http://localhost:3000/downloadmp3?url=${encodeURIComponent(url)}">
+            <a href="${API}/downloadmp3?url=${encodeURIComponent(url)}">
                 <button>Descargar MP3</button>
             </a>
             </div>
@@ -33,15 +35,14 @@ async function buscar(){
         data.formatos.forEach(f => {
 
             html += `
-                <a href="http://localhost:3000/download?url=${encodeURIComponent(url)}&format=${f.id}">
+                <a href="${API}/download?url=${encodeURIComponent(url)}&format=${f.id}">
                     <button>${f.calidad}</button>
                 </a>
             `
 
         })
 
-        html+= `</div>
-                </div>`
+        html += `</div></div>`
 
         document.getElementById("video").innerHTML = html
 
