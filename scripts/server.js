@@ -1,6 +1,7 @@
 const express = require("express")
 const cors = require("cors")
-const youtubedl = require("youtube-dl-exec")
+const { create } = require("youtube-dl-exec")
+const youtubedl = create(require("youtube-dl-exec/bin/yt-dlp"))
 const ffmpegPath = require("ffmpeg-static")
 
 const app = express()
