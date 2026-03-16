@@ -25,30 +25,23 @@ app.get("/formats", async (req, res) => {
 
     try {
 
-        let url = limpiarURL(decodeURIComponent(req.query.url))
+        const url = req.query.url
+        const videoId = url.split("v=")[1].split("&")[0]
 
-        const info = await youtubedl(url, {
-            dumpSingleJson: true,
-            noWarnings: true,
-            geoBypass: true,
-            extractorArgs: "youtube:player_client=android",
-            addHeader: [
-                "User-Agent:com.google.android.youtube/17.31.35 (Linux; U; Android 11)"
-            ]
-        })
+        const response = await fetch(
+            `https://piped.video/api/v1/streams/${videoId}`
+        )
 
-        const formats = (info.formats || [])
-        .filter(f => f.ext === "mp4" && f.height && f.vcodec !== "none")
-        .map(f => ({
-            calidad: f.height + "p",
-            id: f.format_id,
-            height: f.height
+        const data = await response.json()
+
+        const formats = (data.videoStreams || []).map(v => ({
+            calidad: v.quality,
+            id: v.url
         }))
-        .sort((a,b)=>b.height-a.height)
 
         res.json({
-            titulo: info.title,
-            miniatura: info.thumbnail,
+            titulo: data.title,
+            miniatura: data.thumbnailUrl,
             formatos: formats
         })
 

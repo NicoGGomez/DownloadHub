@@ -41,7 +41,7 @@ async function buscar(){
         data.formatos.forEach(f => {
 
             html += `
-                <a href="${API}/download?url=${encodeURIComponent(url)}&format=${f.id}">
+                <a href="${f.id}">
                     <button>${f.calidad}</button>
                 </a>
             `
