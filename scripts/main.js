@@ -32,6 +32,12 @@ async function buscar(){
             <div class="contenedor-calidad-video">
         `
 
+        if(!data.formatos){
+            document.getElementById("video").innerHTML =
+            "<p>Error obteniendo formatos del video</p>"
+            return
+        }
+
         data.formatos.forEach(f => {
 
             html += `
