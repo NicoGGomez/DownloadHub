@@ -1,6 +1,9 @@
 const express = require("express")
-const youtubedl = require("youtube-dl-exec")
 const cors = require("cors")
+
+const youtubedl = require("youtube-dl-exec").create({
+    binaryPath: require("youtube-dl-exec/bin/yt-dlp")
+})
 
 const app = express()
 app.use(cors())
