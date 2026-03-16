@@ -1,9 +1,6 @@
 const express = require("express")
 const cors = require("cors")
-
-const youtubedl = require("youtube-dl-exec").create({
-    binaryPath: require("youtube-dl-exec/bin/yt-dlp")
-})
+const youtubedl = require("youtube-dl-exec")
 
 const app = express()
 app.use(cors())
@@ -71,10 +68,10 @@ app.get("/download", async (req, res) => {
     const title = info.title.replace(/[^\w\s]/gi, "")
 
     const stream = youtubedl.exec(url, {
-        format: `${format}+bestaudio/best`,
-        output: "-",
-        mergeOutputFormat: "mp4",
-        ffmpegLocation: "ffmpeg"
+    format: `${format}+bestaudio/best`,
+    output: "-",
+    mergeOutputFormat: "mp4",
+    ffmpegLocation: "ffmpeg"
     })
 
     res.setHeader(
